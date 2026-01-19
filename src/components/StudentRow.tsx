@@ -2,8 +2,16 @@ import React from 'react'
 import { EMOJIS, PRESETS, type Emoji, type RollRow } from '../types'
 import { supabase } from '../lib/supabase'
 
-const PARENT_WEB_ORIGIN =
-  (import.meta.env.VITE_PARENT_WEB_ORIGIN as string) || window.location.origin
+/**
+ * PARENT_WEB_ORIGIN을 함수로 변경하여 빌드 시점 실행 방지
+ * window.location.origin은 브라우저 환경에서만 접근 가능
+ */
+function getParentWebOrigin(): string {
+  if (typeof window === 'undefined') {
+    return import.meta.env.VITE_PARENT_WEB_ORIGIN as string || ''
+  }
+  return (import.meta.env.VITE_PARENT_WEB_ORIGIN as string) || window.location.origin
+}
 
 export async function copyParentLink(studentId: string) {
   const { data, error } = await supabase.rpc('create_or_get_parent_link', {
@@ -13,7 +21,8 @@ export async function copyParentLink(studentId: string) {
   if (error) throw error
 
   const token = data as string
-  const url = `${PARENT_WEB_ORIGIN}/p/${token}`
+  const origin = getParentWebOrigin()
+  const url = `${origin}/p/${token}`
 
   await navigator.clipboard.writeText(url)
   return url
