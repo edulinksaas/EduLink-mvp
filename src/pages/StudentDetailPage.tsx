@@ -1,76 +1,117 @@
-import React from 'react'
-import { supabase } from '../lib/supabase'
+import { useEffect, useState } from "react"
+import { useParams, useNavigate } from "react-router-dom"
+import { supabase } from "../lib/supabase"
 
-type Row = {
+type AttendanceRecord = {
+  id: string
   record_date: string
-  status: 'present' | 'absent'
-  feedback_emoji: string | null
-  feedback_text: string | null
+  status: "present" | "absent" | "late"
+  feedback_code: string | null
+  created_at: string
 }
 
-export function StudentDetailPage({
-  classId,
-  studentId,
-  onClose,
-}: {
-  classId: string
-  studentId: string
-  onClose: () => void
-}) {
-  const [items, setItems] = React.useState<Row[]>([])
-  const [loading, setLoading] = React.useState(false)
+const FEEDBACK_MAP: Record<string, { emoji: string; label: string }> = {
+  good: { emoji: "😊", label: "집중 잘함" },
+  normal: { emoji: "😐", label: "보통" },
+  tired: { emoji: "😓", label: "컨디션 저조" },
+  great: { emoji: "🔥", label: "최고" },
+  need: { emoji: "⚠️", label: "지도 필요" },
+}
 
-  React.useEffect(() => {
-    const run = async () => {
-      setLoading(true)
+export default function StudentDetailPage() {
+  const { studentId } = useParams<{ studentId: string }>()
+  const navigate = useNavigate()
+
+  const [loading, setLoading] = useState(true)
+  const [studentName, setStudentName] = useState("")
+  const [records, setRecords] = useState<AttendanceRecord[]>([])
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!studentId) {
+      setError("학생 ID가 없습니다.")
+      setLoading(false)
+      return
+    }
+
+    const load = async () => {
       try {
-        const { data, error } = await supabase
-          .from('attendance_records')
-          .select('record_date,status,feedback_emoji,feedback_text')
-          .eq('class_id', classId)
-          .eq('student_id', studentId)
-          .order('record_date', { ascending: false })
-          .limit(10)
+        setLoading(true)
+        setError(null)
 
-        if (error) throw error
-        setItems((data ?? []) as Row[])
-      } catch (e) {
-        console.error(e)
-        alert('불러오기 실패')
+        const sRes = await supabase
+          .from("students")
+          .select("name")
+          .eq("id", studentId)
+          .single()
+
+        if (sRes.error) throw sRes.error
+        setStudentName(sRes.data?.name ?? "")
+
+        const rRes = await supabase
+          .from("attendance_records")
+          .select("id, record_date, status, feedback_code, created_at")
+          .eq("student_id", studentId)
+          .order("record_date", { ascending: false })
+          .limit(50)
+
+        if (rRes.error) throw rRes.error
+        setRecords(rRes.data ?? [])
+      } catch (e: any) {
+        setError(e.message ?? "데이터를 불러오지 못했습니다.")
       } finally {
         setLoading(false)
       }
     }
-    run()
-  }, [classId, studentId])
+
+    void load()
+  }, [studentId])
+
+  if (loading) return <p>불러오는 중…</p>
+  if (error) return <p style={{ color: "red" }}>{error}</p>
 
   return (
-    <div style={{ border: '1px solid #eee', borderRadius: 12, padding: 12, marginTop: 12, background: '#fff' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <b>학부모 뷰 · 최근 기록</b>
-        <button onClick={onClose}>닫기</button>
-      </div>
+    <div style={{ padding: 24 }}>
+      <button type="button" onClick={() => navigate(-1)}>← 뒤로</button>
 
-      {loading ? <p>불러오는 중...</p> : null}
+      <h2 style={{ marginTop: 16 }}>{studentName} · 학생 상세</h2>
 
-      {!loading && items.length === 0 ? <p style={{ color: '#666' }}>기록 없음</p> : null}
+      {records.length === 0 ? (
+        <p>출결 기록이 없습니다.</p>
+      ) : (
+        <table style={{ width: "100%", marginTop: 16, borderCollapse: "collapse" }}>
+          <thead>
+            <tr>
+              <th align="left">날짜</th>
+              <th align="left">출결</th>
+              <th align="left">피드백</th>
+            </tr>
+          </thead>
+          <tbody>
+            {records.map(r => {
+              const fb = r.feedback_code
+                ? FEEDBACK_MAP[r.feedback_code]
+                : null
 
-      <ul style={{ listStyle: 'none', padding: 0, margin: '10px 0 0' }}>
-        {items.map((it) => (
-          <li key={`${it.record_date}-${it.status}`} style={{ padding: '8px 0', borderBottom: '1px solid #f3f3f3' }}>
-            <div style={{ fontSize: 13 }}>
-              <b>{it.record_date}</b> · {it.status === 'present' ? '출석' : '결석'}
-            </div>
-            {it.status === 'present' ? (
-              <div style={{ marginTop: 4, color: '#111' }}>
-                {it.feedback_emoji ?? '😐'} {it.feedback_text ?? ''}
-              </div>
-            ) : (
-              <div style={{ marginTop: 4, color: '#666' }}>-</div>
-            )}
-          </li>
-        ))}
-      </ul>
+              return (
+                <tr key={r.id}>
+                  <td>{r.record_date}</td>
+                  <td>
+                    {r.status === "present"
+                      ? "출석"
+                      : r.status === "late"
+                      ? "지각"
+                      : "결석"}
+                  </td>
+                  <td>
+                    {fb ? `${fb.emoji} ${fb.label}` : "-"}
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      )}
     </div>
   )
 }

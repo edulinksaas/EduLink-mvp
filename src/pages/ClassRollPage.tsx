@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import type { RollRow } from '../types'
 import { StudentRow } from '../components/StudentRow'
 import { Toast } from '../components/Toast'
-import { StudentDetailPage } from './StudentDetailPage'
+import { useNavigate } from 'react-router-dom'
 
 function getTodayYYYYMMDD() {
   return new Date().toISOString().slice(0, 10)
@@ -23,7 +23,7 @@ export function ClassRollPage({
   const [roll, setRoll] = React.useState<RollRow[]>([])
   const [loading, setLoading] = React.useState(false)
   const [toast, setToast] = React.useState<{ msg: string; type: 'success' | 'error' } | null>(null)
-  const [selectedStudentId, setSelectedStudentId] = React.useState<string | null>(null)
+  const navigate = useNavigate();
 
   const showToast = (msg: string, type: 'success' | 'error', ms: number) => {
     setToast({ msg, type })
@@ -121,20 +121,15 @@ export function ClassRollPage({
             onReload={load}
             onSaved={() => showToast('저장됨', 'success', 500)}
             onError={() => showToast('저장 실패 · 재시도', 'error', 1200)}
-            onOpenDetail={() => setSelectedStudentId(row.student_id)}
+            onOpenDetail={() => navigate(`/academy/student/${row.student_id}`)}
           />
         ))}
       </div>
 
       {toast && <Toast message={toast.msg} type={toast.type} />}
 
-      {selectedStudentId ? (
-        <StudentDetailPage
-          classId={classId.trim()}
-          studentId={selectedStudentId}
-          onClose={() => setSelectedStudentId(null)}
-        />
-      ) : null}
+     
+  
     </div>
   )
 }

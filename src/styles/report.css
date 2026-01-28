@@ -1,0 +1,78 @@
+/* =========================
+   Parent Report Page
+   ========================= */
+
+/* 페이지 전체 래퍼 */
+.parent-report-page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 20px;
+  }
+  
+  /* 상단 라벨 */
+  .parent-report-page .badge {
+    display: inline-block;
+    font-size: 12px;
+    color: #666;
+    background: #f1f3f5;
+    padding: 6px 12px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+    white-space: nowrap;
+    line-height: 1.4;
+    min-width: fit-content;
+  }
+  
+  /* 페이지 타이틀 */
+  .parent-report-page h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+  
+  /* 토큰 변경 버튼 */
+  .parent-report-page .token-btn {
+    display: inline-block;
+    margin-bottom: 24px;
+    padding: 8px 14px;
+    font-size: 14px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: #fff;
+    cursor: pointer;
+  }
+  
+  .parent-report-page .token-btn:hover {
+    background: #f8f9fa;
+  }
+  
+  /* 카드 공통 */
+  .report-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* 카드 제목 */
+  .report-card h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  
+  /* 빈 상태 텍스트 */
+  .empty-text {
+    font-size: 14px;
+    color: #888;
+    line-height: 1.6;
+  }
+  
+  /* 하단 안내 문구 */
+  .report-footer {
+    margin-top: 40px;
+    text-align: center;
+    font-size: 13px;
+    color: #aaa;
+  }

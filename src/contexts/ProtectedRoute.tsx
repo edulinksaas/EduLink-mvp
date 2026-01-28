@@ -1,16 +1,11 @@
-import { Navigate, useLocation } from "react-router-dom"
+import { Navigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth()
-  const location = useLocation()
 
   if (loading) return <div style={{ padding: 24 }}>Loading...</div>
-
-  // ✅ 세션 없으면 학원 로그인으로 + 원래 목적지 저장
-  if (!session) {
-    return <Navigate to="/academy/login" replace state={{ from: location }} />
-  }
+  if (!session) return <Navigate to="/academy/login" replace />
 
   return <>{children}</>
 }

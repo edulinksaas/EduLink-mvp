@@ -1,0 +1,97 @@
+/* =========================
+   Base: Variables & Reset
+   ========================= */
+
+:root {
+  /* Brand Colors */
+  --violet-50: #f5f3ff;
+  --violet-100: #ede9fe;
+  --violet-600: #7c3aed;
+  --violet-700: #6d28d9;
+
+  /* Neutral Colors */
+  --bg: #f6f7fb;
+  --panel: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+
+  /* Status Colors */
+  --danger: #ef4444;
+  --success: #10b981;
+
+  /* Radius */
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
+
+  /* Shadow */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.12);
+
+  /* Spacing */
+  --s-1: 6px;
+  --s-2: 10px;
+  --s-3: 14px;
+  --s-4: 18px;
+  --s-5: 24px;
+
+  /* Typography */
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR",
+    "Apple SD Gothic Neo", "Malgun Gothic", Arial, "Helvetica Neue", sans-serif;
+
+  --fs-0: 12px;
+  --fs-1: 14px;
+  --fs-2: 16px;
+  --fs-3: 20px;
+  --fs-4: 28px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.5;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* =========================
+   Layout Utilities
+   ========================= */
+
+.container {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 28px 18px;
+}
+
+.stack {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.row {
+  display: flex;
+  gap: var(--s-2);
+  align-items: center;
+}
+
+.center {
+  display: grid;
+  place-items: center;
+}

@@ -1,0 +1,286 @@
+/* =========================
+   Pages: Auth (Login Page)
+   ========================= */
+
+.authPage {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 28px 16px;
+  background: var(--bg);
+}
+
+.authCard {
+  width: min(860px, 100%);
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(229, 231, 235, 0.9);
+  border-radius: var(--r-lg);
+  padding: 22px;
+  backdrop-filter: blur(10px);
+}
+
+.authBrand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: var(--s-3);
+}
+
+.authLogo {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: #5b21b6;
+  color: white;
+  font-weight: 800;
+}
+
+.authTitle {
+  font-weight: 800;
+  font-size: var(--fs-3);
+}
+
+.authSubtitle,
+.authSub {
+  font-size: var(--fs-0);
+  color: var(--muted);
+}
+
+.authTabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #eef2ff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: var(--s-2) 0 var(--s-3);
+}
+
+.authTab {
+  padding: 10px 12px;
+  background: transparent;
+  border: 0;
+  font-weight: 700;
+  color: #374151;
+  cursor: pointer;
+}
+
+.authTab.isActive {
+  background: white;
+}
+
+.authH1 {
+  font-size: var(--fs-4);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.authDesc {
+  margin: 8px 0 var(--s-3);
+  color: var(--muted);
+  font-size: var(--fs-1);
+}
+
+.authForm {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.authField {
+  display: grid;
+  gap: var(--s-1);
+}
+
+.authLabel {
+  font-size: var(--fs-0);
+  color: var(--muted);
+}
+
+.authInput {
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 0 12px;
+  background: white;
+  outline: none;
+}
+
+.authInput:focus {
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.25);
+}
+
+.authPrimary {
+  height: 46px;
+  border-radius: var(--r-md);
+  border: 0;
+  background: linear-gradient(90deg, #6d28d9, #4f46e5);
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.authPrimary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.authSecondary {
+  height: 46px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: white;
+  color: #374151;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.authSecondary:hover {
+  background: #f9fafb;
+}
+
+.authCheck {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-1);
+  color: #374151;
+}
+
+.authError {
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: var(--fs-1);
+}
+
+.authHint {
+  font-size: var(--fs-0);
+  color: var(--muted);
+}
+
+.authFooter {
+  text-align: center;
+  font-size: var(--fs-0);
+  color: #9ca3af;
+  margin-top: var(--s-4);
+}
+
+/* =========================
+   Pages: Parent Token Input
+   ========================= */
+
+.parentTokenBox {
+  margin-top: var(--s-3);
+}
+
+/* =========================
+   Pages: Parent Report (Report Page)
+   ========================= */
+
+.reportPage,
+.parent-report-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 20px;
+  min-height: 100vh;
+}
+
+.reportPage .badge,
+.parent-report-page .badge {
+  display: inline-block;
+  font-size: var(--fs-0);
+  color: var(--muted);
+  background: #f1f3f5;
+  padding: 6px 12px;
+  border-radius: 999px;
+  margin-bottom: var(--s-2);
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.reportPage h1,
+.parent-report-page h1 {
+  font-size: var(--fs-4);
+  font-weight: 700;
+  margin-bottom: var(--s-5);
+}
+
+.reportPage .token-btn,
+.parent-report-page .token-btn {
+  display: inline-block;
+  margin-bottom: var(--s-5);
+  padding: 8px 14px;
+  font-size: var(--fs-1);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #fff;
+  cursor: pointer;
+}
+
+.reportPage .token-btn:hover,
+.parent-report-page .token-btn:hover {
+  background: #f8f9fa;
+}
+
+.reportCard,
+.report-card {
+  background: #ffffff;
+  border-radius: var(--r-md);
+  padding: 20px;
+  margin-bottom: var(--s-3);
+  box-shadow: var(--shadow-sm);
+}
+
+.reportCard h2,
+.report-card h2 {
+  font-size: var(--fs-3);
+  font-weight: 600;
+  margin-bottom: var(--s-2);
+}
+
+.reportEmpty,
+.empty-text {
+  font-size: var(--fs-1);
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.reportFooter,
+.report-footer {
+  margin-top: 40px;
+  text-align: center;
+  font-size: var(--fs-1);
+  color: #aaa;
+}
+
+/* =========================
+   Pages: Academy App
+   ========================= */
+
+.academyPage {
+  min-height: 100vh;
+  padding: var(--s-5) var(--s-3);
+}
+
+.academyPanel {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.page .card {
+  width: 100%;
+  max-width: 520px;
+}

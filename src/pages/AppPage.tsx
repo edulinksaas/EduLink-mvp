@@ -6,13 +6,13 @@ import { SettingsPage } from './SettingsPage'
 import { OnboardingAcademyPage } from './OnboardingAcademyPage'
 
 export function AppPage() {
-  const { user } = useAuth()
+  const { session } = useAuth()
   const [academyId, setAcademyId] = useState<string | null | undefined>(undefined)
   const [tab, setTab] = useState<'attendance' | 'settings'>('attendance')
 
   // 로그인 후 academy_users에서 academy_id 조회
   useEffect(() => {
-    if (!user) {
+    if (!session?.user) {
       setAcademyId(null)
       return
     }
@@ -21,7 +21,7 @@ export function AppPage() {
       const { data, error } = await supabase
         .from('academy_users')
         .select('academy_id')
-        .eq('user_id', user.id)
+        .eq('user_id', session.user.id)
         .maybeSingle()
 
       if (error) {
@@ -34,7 +34,7 @@ export function AppPage() {
     }
 
     loadAcademyId()
-  }, [user])
+  }, [session?.user])
 
   // academy_id가 생성되면 출결 페이지로 전환
   const handleAcademyCreated = (newAcademyId: string) => {

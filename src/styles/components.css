@@ -1,0 +1,323 @@
+/* =========================
+   Components: Card
+   ========================= */
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  padding: 22px;
+}
+
+.cardHeader {
+  margin-bottom: var(--s-3);
+}
+
+.cardBody {
+  margin-top: var(--s-2);
+}
+
+/* =========================
+   Components: Button
+   ========================= */
+
+.btn,
+.button {
+  height: 44px;
+  border-radius: var(--r-md);
+  padding: 0 14px;
+  font-size: var(--fs-2);
+  border: 1px solid var(--border);
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn:disabled,
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btnPrimary,
+.button--primary {
+  border-color: transparent;
+  background: var(--violet-600);
+  color: white;
+}
+
+.btnPrimary:hover,
+.button--primary:hover {
+  background: var(--violet-700);
+}
+
+.btnGhost,
+.button--ghost {
+  background: transparent;
+  border-color: var(--border);
+}
+
+.btnGhost:hover,
+.button--ghost:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.button--active {
+  background: var(--violet-100);
+  color: var(--violet-700);
+  border-color: var(--violet-600);
+}
+
+.btnDanger {
+  border-color: transparent;
+  background: var(--danger);
+  color: white;
+}
+
+.btnDanger:hover {
+  background: #dc2626;
+}
+
+/* =========================
+   Components: Input & Field
+   ========================= */
+
+.field {
+  display: grid;
+  gap: var(--s-1);
+}
+
+.label {
+  font-size: var(--fs-1);
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.input {
+  width: 100%;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 0 12px;
+  font-size: var(--fs-2);
+  outline: none;
+  background: #fff;
+}
+
+.input:focus {
+  border-color: rgba(124, 58, 237, 0.55);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+}
+
+.help,
+.hint {
+  margin-top: var(--s-1);
+  color: var(--muted);
+  font-size: var(--fs-1);
+  line-height: 1.5;
+}
+
+/* =========================
+   Components: Tabs
+   ========================= */
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #eef2ff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: var(--s-2) 0 var(--s-3);
+}
+
+.tab {
+  padding: 10px 12px;
+  background: transparent;
+  border: 0;
+  font-weight: 700;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tabActive,
+.tab.isActive {
+  background: white;
+  color: var(--violet-700);
+}
+
+/* =========================
+   Components: Chip / Badge
+   ========================= */
+
+.chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #f9f9f9;
+  cursor: pointer;
+  font-size: var(--fs-1);
+  transition: all 0.2s;
+}
+
+.chip.on,
+.chipActive {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.badge {
+  display: inline-block;
+  font-size: var(--fs-0);
+  color: var(--muted);
+  background: #f1f3f5;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+/* =========================
+   Components: Status
+   ========================= */
+
+.muted {
+  color: var(--muted);
+}
+
+.error {
+  margin-top: var(--s-2);
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.08);
+  color: #991b1b;
+  font-size: var(--fs-1);
+}
+
+.success {
+  margin-top: var(--s-2);
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  background: rgba(16, 185, 129, 0.08);
+  color: #065f46;
+  font-size: var(--fs-1);
+}
+
+.toast {
+  margin-top: var(--s-2);
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: rgba(16, 185, 129, 0.1);
+  color: #065f46;
+  font-size: var(--fs-1);
+}
+
+/* =========================
+   Components: Divider
+   ========================= */
+
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: var(--s-4) 0;
+  border: 0;
+}
+
+/* =========================
+   Components: Checkbox
+   ========================= */
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-1);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.checkbox input[type="checkbox"] {
+  cursor: pointer;
+}
+
+/* =========================
+   Components: Title & Subtitle
+   ========================= */
+
+.title {
+  margin: 0;
+  font-size: var(--fs-3);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.sub,
+.subtitle {
+  margin: var(--s-1) 0 0 0;
+  color: var(--muted);
+  font-size: var(--fs-1);
+  line-height: 1.6;
+}
+
+/* =========================
+   Components: Row / List
+   ========================= */
+
+.list {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.row {
+  display: flex;
+  gap: var(--s-2);
+  align-items: center;
+  padding: var(--s-2) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.rowMain {
+  display: flex;
+  gap: var(--s-2);
+  align-items: center;
+  flex: 1;
+}
+
+.rowTop {
+  display: grid;
+  gap: var(--s-1);
+}
+
+.rowTitle {
+  font-weight: 600;
+  font-size: var(--fs-2);
+}
+
+.rowSub {
+  font-size: var(--fs-1);
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.name {
+  font-weight: 700;
+  font-size: var(--fs-2);
+}
+
+/* =========================
+   Components: Section
+   ========================= */
+
+.reportSection {
+  margin-top: var(--s-3);
+}
