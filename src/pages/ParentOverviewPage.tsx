@@ -86,6 +86,7 @@ function labelFromKey(key?: string | null) {
   if (key === "tired") return "컨디션 저조"
   if (key === "great") return "최고"
   if (key === "need") return "지도 필요"
+  if (key === "need_focus") return "지도 필요"
   if (key === "normal") return "보통" // DB에 normal로 들어간 흔적 대응
   return ""
 }
@@ -97,6 +98,7 @@ function emojiFromKey(key?: string | null) {
   if (key === "tired") return "😓"
   if (key === "great") return "🔥"
   if (key === "need") return "⚠️"
+  if (key === "need_focus") return "⚠️"
   if (key === "normal") return "😐"
   return ""
 }
@@ -162,7 +164,7 @@ function normalizeParentOverview(raw: unknown): ParentOverviewVM {
 
   const today = todayRow
     ? {
-        id: String(todayRow.id ?? ""),
+        id: String(todayRow.id ?? `today-${todayRow.record_date ?? todayRow.date ?? "x"}`),
         status: (todayRow.status ?? todayRow.attendance ?? null) as any,
         record_date: String(todayRow.record_date ?? todayRow.date ?? ""),
         feedback_key: todayRow.feedback_key ?? todayRow.feedback_code ?? null,
@@ -174,22 +176,25 @@ function normalizeParentOverview(raw: unknown): ParentOverviewVM {
   const recent = rows
     .filter((r) => {
       if (!r) return false
-      if (todayRow?.id && r.id === todayRow.id) return false
+      if (todayRow && r.id && todayRow.id && r.id === todayRow.id) return false
+      const d1 = String(r.record_date ?? r.date ?? "")
+      const d2 = String(todayRow?.record_date ?? todayRow?.date ?? "")
+      if (todayRow && d1 && d2 && d1 === d2) return false
       return true
     })
-    .map((r) => ({
-      id: String(r.id ?? ""),
-      date: String(r.date ?? r.record_date ?? ""),
-      feedback_key: r.feedback_key ?? r.feedback_code ?? null,
-      status_emoji: r.status_emoji ?? r.feedback_emoji ?? null,
-      status_text: r.status_text ?? r.feedback_text ?? null,
-      attendance: ((r.attendance ?? r.status ?? "unknown") as any) as
-        | "present"
-        | "absent"
-        | "late"
-        | "unknown",
-    }))
-    .filter((r) => r.id && r.date)
+    .map((r, idx) => {
+      const date = String(r.date ?? r.record_date ?? "")
+      const id = String(r.id ?? `${date || "row"}-${idx}`)
+      return {
+        id,
+        date,
+        feedback_key: r.feedback_key ?? r.feedback_code ?? null,
+        status_emoji: r.status_emoji ?? r.feedback_emoji ?? null,
+        status_text: r.status_text ?? r.feedback_text ?? null,
+        attendance: (r.attendance ?? r.status ?? "unknown") as "present" | "absent" | "late" | "unknown",
+      }
+    })
+    .filter((r) => r.date)
 
   return { student, today, recent }
 }
