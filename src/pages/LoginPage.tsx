@@ -62,19 +62,6 @@ export default function LoginPage() {
     setMode("parent")
   }, [nav])
 
-  React.useEffect(() => {
-    const sub = supabase.auth.onAuthStateChange((event) => {
-      if (event === "TOKEN_REFRESH_FAILED") {
-        supabase.auth.signOut()
-        localStorage.clear()
-        sessionStorage.clear()
-        nav("/academy/login", { replace: true })
-      }
-    })
-
-    return () => sub.data.subscription.unsubscribe()
-  }, [nav])
-
   const onAcademyLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
