@@ -1,7 +1,6 @@
 import React from "react"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { supabase } from "../lib/supabase"
-import "../parent/pages/Parent.css"
 import ParentHeader from "../components/ParentHeader"
 
 type ParentOverviewRow = {

@@ -1,68 +1,55 @@
-// src/pages/ParentTokenPage.tsx
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-
-function extractToken(input: string): string | null {
-  const v = input.trim();
-  if (!v) return null;
-  try {
-    const url = new URL(v);
-    const parts = url.pathname.split("/").filter(Boolean);
-    const pIndex = parts.indexOf("p");
-    if (pIndex !== -1 && parts[pIndex + 1]) return parts[pIndex + 1];
-  } catch {}
-  const m = v.match(/\/p\/([^/?#]+)/);
-  if (m?.[1]) return m[1];
-  return v;
-}
+import React from "react"
+import { useNavigate, useParams } from "react-router-dom"
 
 export default function ParentTokenPage() {
-  const nav = useNavigate();
-  const [invite, setInvite] = useState("");
-  const [remember, setRemember] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const nav = useNavigate()
+  const { token } = useParams<{ token: string }>()
+  const [remember, setRemember] = React.useState(true)
 
-  const onGo = () => {
-    setError(null);
-    const token = extractToken(invite);
-    if (!token) return setError("초대 링크(또는 토큰)를 입력해주세요.");
-    if (remember) localStorage.setItem("edulink_parent_token", token);
-    nav(`/p/${token}`, { replace: true });
-  };
+  React.useEffect(() => {
+    if (!token) return
+    // ✅ token 페이지에 들어오면 바로 저장 + 이동하고 싶으면 아래 주석 해제
+    // localStorage.setItem("edulink_parent_token", token)
+    // nav("/parent/app", { replace: true })
+  }, [token, nav])
+
+  const onContinue = () => {
+    if (!token) return
+    if (remember) localStorage.setItem("edulink_parent_token", token)
+    else localStorage.removeItem("edulink_parent_token")
+
+    nav("/parent/app", { replace: true })
+  }
 
   return (
-    <div className="authPage">
-      <div className="authCard">
-        <h2 className="authH1">학부모 전용</h2>
-        <p className="authDesc">학원에서 받은 초대 링크로 출결/피드백을 확인합니다.</p>
+    <div className="min-h-screen bg-[#f8f9fc] flex items-center justify-center px-4">
+      <div className="w-full max-w-[420px] bg-white rounded-[28px] border border-gray-100 shadow-sm p-6">
+        <div className="text-[18px] font-extrabold text-[#1a1a1a] mb-2">학부모 전용</div>
+        <div className="text-[13px] text-gray-400 mb-5">
+          학원에서 받은 초대 링크로 출결/피드백을 확인합니다.
+        </div>
 
-        <form className="authForm" onSubmit={(e) => { e.preventDefault(); onGo(); }}>
-          <div className="authField">
-            <span className="authLabel">초대 링크 / 토큰</span>
-            <input
-              className="authInput"
-              placeholder="초대 링크를 붙여넣거나 토큰만 입력"
-              value={invite}
-              onChange={(e) => setInvite(e.target.value)}
-            />
-          </div>
+        <div className="text-[12px] text-gray-400 mb-2">토큰</div>
+        <div className="w-full rounded-2xl border border-gray-200 px-4 py-3 text-[13px] text-gray-700 break-all">
+          {token ?? ""}
+        </div>
 
-          <label className="authCheck">
-            <input
-              type="checkbox"
-              checked={remember}
-              onChange={(e) => setRemember(e.target.checked)}
-            />
-            이 기기에서 다음부터 자동으로 보기
-          </label>
+        <label className="flex items-center gap-2 text-[13px] text-gray-500 font-semibold mt-4">
+          <input
+            type="checkbox"
+            checked={remember}
+            onChange={(e) => setRemember(e.target.checked)}
+          />
+          이 기기에서 저장
+        </label>
 
-          {error && <div className="authError">{error}</div>}
-
-          <button type="submit" className="authPrimary" disabled={!invite.trim()}>확인</button>
-
-          <div className="authHint">예) https://도메인/p/토큰 링크를 그대로 붙여넣어도 돼요.</div>
-        </form>
+        <button
+          onClick={onContinue}
+          className="mt-5 h-12 w-full rounded-2xl bg-[#6344d4] text-white font-extrabold"
+        >
+          학부모 페이지로 이동
+        </button>
       </div>
     </div>
-  );
+  )
 }

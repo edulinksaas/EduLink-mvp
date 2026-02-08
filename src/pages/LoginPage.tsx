@@ -1,6 +1,7 @@
 import React from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { supabase } from "../lib/supabase"
+import { loadAcademyContext } from "../lib/loadAcademyContext"
 
 type Mode = "academy" | "parent"
 
@@ -8,27 +9,27 @@ function extractToken(input: string) {
   const v = input.trim()
   if (!v) return ""
 
-  // 링크 붙여넣기 지원: .../p/:token 또는 ?token=xxx
   try {
     if (v.startsWith("http://") || v.startsWith("https://")) {
       const u = new URL(v)
       const parts = u.pathname.split("/").filter(Boolean)
-      // /p/:token
       const pIndex = parts.findIndex((x) => x === "p")
       if (pIndex >= 0 && parts[pIndex + 1]) return parts[pIndex + 1]
-      // ?token=
       const q = u.searchParams.get("token")
       if (q) return q
     }
   } catch {}
 
-  // 그냥 토큰만 입력한 경우
   return v
 }
 
 export default function LoginPage() {
   const nav = useNavigate()
-  const [mode, setMode] = React.useState<Mode>("academy")
+  const [sp, setSp] = useSearchParams()
+
+  // ✅ sp 객체를 deps로 쓰지 말고 "값"을 뽑아서 deps로 써라
+  const modeFromQuery = ((sp.get("mode") as Mode) || "academy") as Mode
+  const [mode, setMode] = React.useState<Mode>(modeFromQuery)
 
   // academy
   const [email, setEmail] = React.useState("")
@@ -41,38 +42,75 @@ export default function LoginPage() {
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
-  // 이미 학원 세션 있으면 바로 앱으로
+  // ✅ 쿼리가 바뀌면 탭도 동기화
   React.useEffect(() => {
-    const run = async () => {
-      const { data } = await supabase.auth.getSession()
-      if (data.session) nav("/academy/app", { replace: true })
-    }
-    void run()
-  }, [nav])
+    setMode(modeFromQuery)
+  }, [modeFromQuery])
 
+  // ✅ 저장된 토큰 있으면 자동 채우고 parent로 전환(원하면)
   React.useEffect(() => {
-    // 저장된 토큰 있으면 학부모로 바로 보낼지 선택
     const saved = localStorage.getItem("edulink_parent_token")
-    if (!saved) return
+    if (saved) {
+      setParentInput(saved)
 
-    // ✅ 자동으로 학부모 리포트로 보내고 싶으면:
-    // nav(`/p/${saved}`, { replace: true })
+      // 토큰이 있으면 자동으로 parent 탭으로 바꾸고 싶으면 아래 유지
+      // (원치 않으면 이 블록 삭제)
+      setMode("parent")
+      setSp((prev) => {
+        const next = new URLSearchParams(prev)
+        next.set("mode", "parent")
+        return next
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-    // ✅ 자동이 싫으면: 학부모 탭만 켜두기(권장: 첫 주는 이게 덜 꼬임)
-    setMode("parent")
-  }, [nav])
+  // ✅ 탭 변경: state + URL 쿼리 동기화 (이게 핵심)
+  const goMode = (m: Mode) => {
+    setError(null)
+    setMode(m)
+    setSp((prev) => {
+      const next = new URLSearchParams(prev)
+      next.set("mode", m)
+      return next
+    })
+  }
 
   const onAcademyLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
+  
     try {
-      const { error: err } = await supabase.auth.signInWithPassword({
+      const { data, error: err } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
       if (err) throw err
-      nav("/academy/app", { replace: true })
+  
+      const uid = data.user.id
+
+      // ✅ 1. 내가 속한 academy_id 가져오기
+      const { data: academyUsers, error: auErr } = await supabase
+        .from("academy_users")
+        .select("academy_id")
+        .eq("user_id", uid)
+
+      if (auErr) {
+        throw new Error("학원 정보 조회 실패")
+      }
+
+      const academyId = academyUsers?.[0]?.academy_id
+
+      if (!academyId) {
+        throw new Error("소속된 학원을 찾을 수 없습니다.")
+      }
+
+      // ✅ 2. academy context 로드 (학생/수업 살아남)
+      await loadAcademyContext(academyId)
+  
+      // ✅ 3. 이제 이동
+      nav("/academy/home", { replace: true })
     } catch (e: any) {
       setError(e?.message ?? "로그인 실패")
     } finally {
@@ -86,13 +124,10 @@ export default function LoginPage() {
     setError(null)
     try {
       const token = extractToken(parentInput)
-      if (!token) throw new Error("토큰 또는 초대 링크를 입력해주세요.")
+      if (!token) throw new Error("초대 링크(또는 코드)를 입력해주세요.")
 
-      if (remember) {
-        localStorage.setItem("edulink_parent_token", token)
-      } else {
-        localStorage.removeItem("edulink_parent_token")
-      }
+      if (remember) localStorage.setItem("edulink_parent_token", token)
+      else localStorage.removeItem("edulink_parent_token")
 
       nav(`/p/${token}`, { replace: true })
     } catch (e: any) {
@@ -103,90 +138,85 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="authPage">
-      <div className="authCard">
-        <div className="authBrand">
-          <div className="authLogo">E</div>
-          <div>
-            <div className="authTitle">Edu-link</div>
-            <div className="authSub">학원 운영 · 학부모 커뮤니케이션</div>
+    <div className="loginBg">
+      <div className="loginCard">
+        {/* 탭 */}
+        <div className="loginTabs">
+          <button
+            type="button"
+            className={`loginTab ${mode === "academy" ? "isActive" : ""}`}
+            onClick={() => goMode("academy")}
+          >
+            학원 로그인
+          </button>
+
+          <button
+            type="button"
+            className={`loginTab ${mode === "parent" ? "isActive" : ""}`}
+            onClick={() => goMode("parent")}
+          >
+            학부모 로그인
+          </button>
+        </div>
+
+        {/* 헤더 */}
+        <div className="loginInner">
+          <div className="loginHeader">
+            <div className="loginLogoRow">
+              <img className="loginLogo" src="/logo.png" alt="Edu-Link" />
+            </div>
+
+            <div className="loginSubtitle">
+              {mode === "academy"
+                ? "선생님을 위한 출결 관리 플랫폼"
+                : "아이의 출결 소식을 가장 빠르게"}
+            </div>
           </div>
-        </div>
 
-        <div className="authTabs">
-          <button
-            type="button"
-            className={`authTab ${mode === "academy" ? "isActive" : ""}`}
-            onClick={() => setMode("academy")}
-          >
-            학원
-          </button>
-          <button
-            type="button"
-            className={`authTab ${mode === "parent" ? "isActive" : ""}`}
-            onClick={() => setMode("parent")}
-          >
-            학부모
-          </button>
-        </div>
-
-        {mode === "academy" ? (
-          <>
-            <h1 className="authH1">학원 로그인</h1>
-            <p className="authDesc">출결/피드백 관리를 위한 학원 전용 로그인</p>
-
-            <form onSubmit={onAcademyLogin} className="authForm">
-              <label className="authField">
-                <span className="authLabel">이메일</span>
+          {mode === "academy" ? (
+            <form onSubmit={onAcademyLogin} className="loginForm">
+              <div className="field">
+                <div className="label">이메일</div>
                 <input
-                  className="authInput"
+                  className="input"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="email"
+                  placeholder="example@email.com"
                 />
-              </label>
+              </div>
 
-              <label className="authField">
-                <span className="authLabel">비밀번호</span>
+              <div className="field">
+                <div className="label">비밀번호</div>
                 <input
-                  className="authInput"
+                  className="input"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete="current-password"
+                  placeholder="••••••••"
                 />
-              </label>
+              </div>
 
-              {error && <div className="authError">{error}</div>}
+              {error && <div className="error">{error}</div>}
 
-              <button className="authPrimary" disabled={loading}>
-                {loading ? "로그인 중..." : "로그인"}
-              </button>
-
-              <button type="button" className="authSecondary" onClick={() => nav("/academy/signup")}>
-                회원가입
+              <button className="primaryBtn" disabled={loading}>
+                {loading ? "로그인 중..." : "학원 로그인"}
               </button>
             </form>
-          </>
-        ) : (
-          <>
-            <h1 className="authH1">학부모 전용</h1>
-            <p className="authDesc">
-              학원에서 받은 초대 링크로 출결/피드백을 확인합니다.
-            </p>
-
-            <form onSubmit={onParentEnter} className="authForm">
-              <label className="authField">
-                <span className="authLabel">초대 링크 / 토큰</span>
+          ) : (
+            <form onSubmit={onParentEnter} className="loginForm">
+              <div className="field">
+                <div className="label">초대 링크 또는 코드</div>
                 <input
-                  className="authInput"
+                  className="input"
                   value={parentInput}
                   onChange={(e) => setParentInput(e.target.value)}
-                  placeholder="초대 링크를 붙여넣거나 토큰만 입력"
+                  placeholder="전송받은 코드를 입력하세요"
                 />
-              </label>
+              </div>
 
-              <label className="authCheck">
+              <label className="rememberBox">
                 <input
                   type="checkbox"
                   checked={remember}
@@ -195,21 +225,29 @@ export default function LoginPage() {
                 <span>이 기기에서 다음부터 자동으로 보기</span>
               </label>
 
-              {error && <div className="authError">{error}</div>}
+              {error && <div className="error">{error}</div>}
 
-              <button className="authPrimary" disabled={loading}>
-                {loading ? "확인 중..." : "확인"}
+              <button className="primaryBtn" disabled={loading}>
+                {loading ? "확인 중..." : "출결 확인하기"}
               </button>
 
-              <div className="authHint">
-                예) https://도메인/p/토큰 형태의 링크를 그대로 붙여넣어도 돼요.
+              <button
+                type="button"
+                className="subBtn"
+                onClick={() => goMode("academy")}
+              >
+                학원 로그인으로 돌아가기
+              </button>
+
+              <div className="hint">
+                예) https://도메인/p/토큰 링크를 그대로 붙여넣어도 돼요.
               </div>
             </form>
-          </>
-        )}
-
-        <div className="authFooter">© 2026 Edu-link MVP</div>
+          )}
+        </div>
       </div>
+
+      <div className="copyright">© 2026 Edu-link MVP</div>
     </div>
   )
 }
