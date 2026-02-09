@@ -203,6 +203,14 @@ export default function LoginPage() {
               <button className="primaryBtn" disabled={loading}>
                 {loading ? "로그인 중..." : "학원 로그인"}
               </button>
+
+              <button
+                type="button"
+                className="subBtn"
+                onClick={() => nav("/academy/signup")}
+              >
+                회원가입 하러 가기
+              </button>
             </form>
           ) : (
             <form onSubmit={onParentEnter} className="loginForm">

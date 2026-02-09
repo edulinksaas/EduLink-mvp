@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 
 import LoginPage from "./pages/LoginPage"
+import AcademySignupPage from "./pages/AcademySignupPage"
 import ParentTokenPage from "./pages/ParentTokenPage"
 import ParentAppPage from "./pages/ParentAppPage"
 import ParentActionPage from "./pages/ParentActionPage"
@@ -23,6 +24,7 @@ export default function App() {
         {/* 공개 라우트 */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/academy/login" element={<LoginPage />} />
+        <Route path="/academy/signup" element={<AcademySignupPage />} />
         <Route path="/p/:token" element={<ParentTokenPage />} />
         <Route path="/parent/app" element={<ParentAppPage />} />
         <Route path="/parent/action" element={<ParentActionPage />} />
