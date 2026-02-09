@@ -7,4 +7,10 @@ if (!url || !anon) {
   throw new Error("Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY")
 }
 
-export const supabase = createClient(url, anon)
+export const supabase = createClient(url, anon, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
+  },
+})

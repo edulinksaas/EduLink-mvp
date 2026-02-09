@@ -562,6 +562,11 @@ export default function AcademyAttendancePage() {
               )}
             </section>
 
+            {/* 모바일용 학생 검색 목록 */}
+            <div className="lg:hidden">
+              <AttendanceList />
+            </div>
+
             {/* ✅ 학부모 공유 링크 */}
             <section className="space-y-3">
               <label className="text-[13px] font-medium text-gray-700">학부모 공유 링크</label>
@@ -688,8 +693,8 @@ export default function AcademyAttendancePage() {
             </section>
           </div>
 
-          {/* 오른쪽 */}
-          <div className="lg:w-80 lg:flex-shrink-0">
+          {/* 오른쪽 (데스크톱용 학생 검색 목록) */}
+          <div className="hidden lg:block lg:w-80 lg:flex-shrink-0">
             <AttendanceList />
           </div>
         </div>

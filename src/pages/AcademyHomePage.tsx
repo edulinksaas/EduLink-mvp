@@ -11,47 +11,66 @@ type View = "attendance" | "registration" | "consultation" | "students"
 
 export default function AcademyHomePage() {
   const nav = useNavigate()
-  const academyName = "에듀링크 축구클럽"
+  const [academyName, setAcademyName] = React.useState<string>("")
 
   React.useEffect(() => {
-    const debug = async () => {
-      // 1. 로그인 세션 확인
-      const { data: sessionData } = await supabase.auth.getSession()
-      console.log("SESSION:", sessionData)
+    const loadAcademyName = async () => {
+      try {
+        // 1. 로그인 세션 확인
+        const { data: sessionData } = await supabase.auth.getSession()
+        console.log("SESSION:", sessionData)
 
-      if (!sessionData.session) {
-        console.error("❌ 세션 없음")
-        return
+        if (!sessionData.session) {
+          console.error("❌ 세션 없음")
+          return
+        }
+
+        const userId = sessionData.session.user.id
+        console.log("USER ID:", userId)
+
+        // 2. academy_users에서 academy_id 조회
+        const { data: academyUsers, error: auErr } = await supabase
+          .from("academy_users")
+          .select("academy_id")
+          .eq("user_id", userId)
+
+        console.log("ACADEMY USERS:", academyUsers, auErr)
+
+        if (auErr) throw auErr
+
+        const academyId = academyUsers?.[0]?.academy_id
+
+        if (!academyId) {
+          console.error("❌ academy_id 없음")
+          return
+        }
+
+        // 3. academies에서 학원명 조회
+        const { data: academy, error: academyErr } = await supabase
+          .from("academies")
+          .select("name")
+          .eq("id", academyId)
+          .maybeSingle()
+
+        if (academyErr) throw academyErr
+
+        if (academy?.name) {
+          setAcademyName(academy.name)
+        }
+
+        // 4. students 조회 (디버그용)
+        const { data: students, error: stErr } = await supabase
+          .from("students")
+          .select("*")
+          .eq("academy_id", academyId)
+
+        console.log("STUDENTS:", students, stErr)
+      } catch (e: any) {
+        console.error("학원명 로드 실패:", e)
       }
-
-      const userId = sessionData.session.user.id
-      console.log("USER ID:", userId)
-
-      // 2. academy_users에서 academy_id 조회
-      const { data: academyUsers, error: auErr } = await supabase
-        .from("academy_users")
-        .select("academy_id")
-        .eq("user_id", userId)
-
-      console.log("ACADEMY USERS:", academyUsers, auErr)
-
-      const academyId = academyUsers?.[0]?.academy_id
-
-      if (!academyId) {
-        console.error("❌ academy_id 없음")
-        return
-      }
-
-      // 3. students 조회 (핵심)
-      const { data: students, error: stErr } = await supabase
-        .from("students")
-        .select("*")
-        .eq("academy_id", academyId)
-
-      console.log("STUDENTS:", students, stErr)
     }
 
-    debug()
+    loadAcademyName()
   }, [])
 
   // ✅ 메뉴 이동 (너 라우트에 맞게 map만 수정하면 됨)

@@ -24,7 +24,7 @@ type RecentRecord = {
 
 type ParentReply = {
   id: string
-  date: string // YYYY-MM-DD (created_at 기준)
+  date: string // YYYY-MM-DD (replied_at 기준, 없으면 created_at)
   actionType: string
   parentMessage: string
   replyMessage: string
@@ -99,7 +99,7 @@ export default function ParentAppPage() {
 
   const tokenFromUrl = tokenParam || tokenQuery
   const tokenFromStorage = localStorage.getItem("edulink_parent_token")
-  const token = tokenFromUrl || tokenFromStorage || ""
+  const token = (tokenFromUrl || tokenFromStorage || "").trim()
 
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
@@ -123,20 +123,17 @@ export default function ParentAppPage() {
         setLoading(true)
         setError(null)
 
-        // 1) 토큰 -> student_id
-        const { data: tokenData, error: tokenError } = await supabase
-          .from("parent_tokens")
-          .select("student_id")
-          .eq("token", token)
-          .maybeSingle()
+        // 1) 토큰 -> student_id (RPC 사용)
+        const { data: studentId, error: tokenError } = await supabase.rpc(
+          "get_student_id_by_parent_token",
+          { p_token: token }
+        )
 
         if (tokenError) throw tokenError
-        if (!tokenData?.student_id) {
+        if (!studentId) {
           localStorage.removeItem("edulink_parent_token")
           throw new Error("유효하지 않은 토큰입니다.")
         }
-
-        const studentId = tokenData.student_id
 
         // 2) 학생 이름
         const { data: studentData, error: studentError } = await supabase
@@ -198,14 +195,11 @@ export default function ParentAppPage() {
           })
         )
 
-        // 4) ✅ 학원 답변만(parent_actions.reply_message) 가져오기
-        const { data: actions, error: actionsError } = await supabase
-          .from("parent_actions")
-          .select("id, created_at, action_type, message, reply_message, replied_at")
-          .eq("student_id", studentId)
-          .not("reply_message", "is", null)
-          .order("replied_at", { ascending: false })
-          .limit(50)
+        // 4) ✅ 학원 답변만(parent_actions.reply_message) 가져오기 (RPC 사용)
+        const { data: actions, error: actionsError } = await supabase.rpc(
+          "get_parent_replies_by_token",
+          { p_token: token }
+        )
 
         if (actionsError) throw actionsError
 
@@ -213,7 +207,7 @@ export default function ParentAppPage() {
           .filter((x: any) => (x.reply_message || "").trim().length > 0)
           .map((x: any) => ({
             id: x.id,
-            date: toYYYYMMDD(x.created_at),
+            date: toYYYYMMDD(x.replied_at ?? x.created_at),
             actionType: x.action_type,
             parentMessage: x.message || "",
             replyMessage: x.reply_message || "",
